@@ -2,6 +2,20 @@ import SwiftUI
 import AppKit
 import UserNotifications
 
+extension Color {
+    func toHexString() -> String {
+        let components = self.cgColor!.components!
+        let r = components[0]
+        let g = components[1]
+        let b = components[2]
+        
+        return String(format: "%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
+    }
+
+    static func fromHexString(_ hex: String) -> Color {
+        return Color(hex: hex)
+    }
+}
 
 @main
 struct HabitFlashApp: App {
@@ -71,7 +85,7 @@ struct HabitFlashContentView: View {
     @AppStorage("minSeconds") private var minSeconds: Int = 5
     @AppStorage("maxSeconds") private var maxSeconds: Int = 15
     @AppStorage("fontSize") private var fontSize: Int = 100
-    @AppStorage("fontColor") private var fontColor: String = "FFFFFF"
+    @AppStorage("fontColor") private var fontColorHex: String = "FFFFFF"
     @AppStorage("fadeInOut") private var fadeInOut: Bool = false
     @AppStorage("playSound") private var playSound: Bool = false
     @AppStorage("sound") private var sound: String = "Default"
@@ -89,11 +103,14 @@ struct HabitFlashContentView: View {
     private var remindersArray: [String] {
         reminders.components(separatedBy: ",")
     }
+    private var fontColor: Color {
+        Color.fromHexString(fontColorHex)
+    }
 
     var body: some View {
         Text(reminderText)
             .font(.system(size: CGFloat(fontSize), weight: .bold, design: .default))
-            .foregroundColor(Color(hex: fontColor))
+            .foregroundColor(fontColor)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.clear)
             .ignoresSafeArea()
@@ -186,7 +203,7 @@ struct SettingsView: View {
     @AppStorage("minSeconds") private var minSeconds: Int = 5
     @AppStorage("maxSeconds") private var maxSeconds: Int = 15
     @AppStorage("fontSize") private var fontSize: Int = 100
-    @AppStorage("fontColor") private var fontColor: String = "FFFFFF"
+    @AppStorage("fontColor") private var fontColorHex: String = "FFFFFF"
     @AppStorage("fadeInOut") private var fadeInOut: Bool = false
     @AppStorage("playSound") private var playSound: Bool = false
     @AppStorage("sound") private var sound: String = "Default"
@@ -194,7 +211,12 @@ struct SettingsView: View {
     @AppStorage("displayDuration") private var displayDuration: Double = 50
     @AppStorage("useFullScreenNotifications") private var useFullScreenNotifications: Bool = true
     @AppStorage("useSystemNotifications") private var useSystemNotifications: Bool = false
-
+    private var fontColor: Binding<Color> {
+        Binding<Color>(
+            get: { Color.fromHexString(fontColorHex) },
+            set: { fontColorHex = $0.toHexString() }
+        )
+    }
 
     var body: some View {
         VStack (alignment: .leading) {
@@ -235,9 +257,9 @@ struct SettingsView: View {
                     .frame(width: 50)
             }
             HStack {
-                Text("Font color (hex):")
-                TextField("", text: $fontColor)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                Text("Font color:")
+                ColorPicker("", selection: fontColor)
+                    .labelsHidden()
                     .frame(width: 100)
             }
             Toggle("Fade in and out", isOn: $fadeInOut)
