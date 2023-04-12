@@ -1,5 +1,7 @@
 import SwiftUI
 import AppKit
+import UserNotifications
+
 
 @main
 struct HabitFlashApp: App {
@@ -15,6 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var settingsWindow: NSWindow!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        requestNotificationPermission()
         let contentView = HabitFlashContentView()
 
         let window = NSWindow(
@@ -51,6 +54,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         settingsWindow.makeKeyAndOrderFront(nil)
     }
+    func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+            if let error = error {
+                print("Error requesting notification authorization: \(error)")
+            } else if !granted {
+                print("Notification authorization not granted")
+            }
+        }
+    }
+
 }
 
 struct HabitFlashContentView: View {
@@ -59,10 +72,19 @@ struct HabitFlashContentView: View {
     @AppStorage("maxSeconds") private var maxSeconds: Int = 15
     @AppStorage("fontSize") private var fontSize: Int = 100
     @AppStorage("fontColor") private var fontColor: String = "FFFFFF"
+    @AppStorage("fadeInOut") private var fadeInOut: Bool = false
+    @AppStorage("playSound") private var playSound: Bool = false
+    @AppStorage("sound") private var sound: String = "Default"
+    @AppStorage("volume") private var volume: Double = 1.0
+    @AppStorage("displayDuration") private var displayDuration: Double = 50
+    @AppStorage("useFullScreenNotifications") private var useFullScreenNotifications: Bool = true
+    @AppStorage("useSystemNotifications") private var useSystemNotifications: Bool = false
+
     
     @State private var timer: Timer? = nil
     @State private var reminderText = ""
     @State private var trigger = false
+    @State private var reminderOpacity = 0.0
 
     private var remindersArray: [String] {
         reminders.components(separatedBy: ",")
@@ -82,6 +104,7 @@ struct HabitFlashContentView: View {
                 showReminder()
                 startNewTimer()
             }
+            .opacity(reminderOpacity)
     }
 
     func startNewTimer() {
@@ -94,12 +117,68 @@ struct HabitFlashContentView: View {
 
 
     func showReminder() {
-        reminderText = remindersArray.randomElement()!.trimmingCharacters(in: .whitespacesAndNewlines)
-        let delay = max(Double(reminderText.count) / 17, 0.5)
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            reminderText = ""
+        if useFullScreenNotifications {
+            playSelectedSound();
+            reminderText = remindersArray.randomElement()!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let delay = max(Double(reminderText.count) / 17, 0.5) * max(1, displayDuration / 20)
+            
+            if fadeInOut {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    reminderOpacity = 1.0
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        reminderOpacity = 0.0
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        reminderText = ""
+                    }
+                }
+            } else {
+                reminderOpacity = 1.0
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    reminderOpacity = 0.0
+                    reminderText = ""
+                }
+            }
+        }
+        if useSystemNotifications {
+            print("Showing system notification");
+            let content = UNMutableNotificationContent()
+            content.title = "HabitFlash Reminder"
+            content.body = reminderText
+            content.sound = playSound ? UNNotificationSound(named: UNNotificationSoundName(rawValue: sound)) : nil
+
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+
+            UNUserNotificationCenter.current().add(request)
         }
     }
+
+    func playSelectedSound() {
+        guard playSound else { return }
+
+        let soundName: String
+        switch sound {
+        case "Chime":
+            soundName = "Ping"
+        case "Bell":
+            soundName = "Submarine"
+        default:
+            soundName = "Purr"
+        }
+
+        if let systemSound = NSSound(named: soundName) {
+            systemSound.volume = Float(volume)
+            systemSound.play()
+        } else {
+            print("Error: Could not load or play the sound file.")
+        }
+    }
+
+
 }
 
 struct SettingsView: View {
@@ -108,6 +187,14 @@ struct SettingsView: View {
     @AppStorage("maxSeconds") private var maxSeconds: Int = 15
     @AppStorage("fontSize") private var fontSize: Int = 100
     @AppStorage("fontColor") private var fontColor: String = "FFFFFF"
+    @AppStorage("fadeInOut") private var fadeInOut: Bool = false
+    @AppStorage("playSound") private var playSound: Bool = false
+    @AppStorage("sound") private var sound: String = "Default"
+    @AppStorage("volume") private var volume: Double = 1.0
+    @AppStorage("displayDuration") private var displayDuration: Double = 50
+    @AppStorage("useFullScreenNotifications") private var useFullScreenNotifications: Bool = true
+    @AppStorage("useSystemNotifications") private var useSystemNotifications: Bool = false
+
 
     var body: some View {
         VStack (alignment: .leading) {
@@ -117,6 +204,13 @@ struct SettingsView: View {
                     .frame(minHeight: 100, maxHeight: .infinity)
                     .border(Color.gray, width: 1)
             }
+            GroupBox(label: Text("Notification display settings")) {
+                VStack(alignment: .leading) {
+                    Toggle("Use full screen notifications", isOn: $useFullScreenNotifications)
+                    Toggle("Use system notifications", isOn: $useSystemNotifications)
+                }
+            }
+            .padding(.bottom)
             HStack {
                 Text("Min seconds:")
                 TextField("", value: $minSeconds, formatter: NumberFormatter())
@@ -129,6 +223,12 @@ struct SettingsView: View {
                     .frame(width: 50)
             }
             HStack {
+                Text("Display duration:")
+                Slider(value: $displayDuration, in: 0...100)
+                    .frame(width: 150)
+                Text("\(Int(displayDuration))")
+            }
+            HStack {
                 Text("Font size:")
                 TextField("", value: $fontSize, formatter: NumberFormatter())
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -139,6 +239,26 @@ struct SettingsView: View {
                 TextField("", text: $fontColor)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(width: 100)
+            }
+            Toggle("Fade in and out", isOn: $fadeInOut)
+            
+            Toggle("Play sound", isOn: $playSound)
+            
+            HStack {
+                Text("Sound:")
+                Picker("Sound", selection: $sound) {
+                    Text("Default").tag("Default")
+                    Text("Chime").tag("Chime")
+                    Text("Bell").tag("Bell")
+                    // Add more sounds here
+                }
+                .frame(width: 150)
+            }
+            
+            HStack {
+                Text("Volume:")
+                Slider(value: $volume, in: 0...1)
+                    .frame(width: 150)
             }
         }
         .padding()

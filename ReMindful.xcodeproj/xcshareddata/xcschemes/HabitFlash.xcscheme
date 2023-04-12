@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "92A381D229DF744F003EAA4C"
                BuildableName = "HabitFlash.app"
-               BlueprintName = "HabitFlash"
-               ReferencedContainer = "container:HabitFlash.xcodeproj">
+               BlueprintName = "ReMindful"
+               ReferencedContainer = "container:ReMindful.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,8 +46,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "92A381D229DF744F003EAA4C"
             BuildableName = "HabitFlash.app"
-            BlueprintName = "HabitFlash"
-            ReferencedContainer = "container:HabitFlash.xcodeproj">
+            BlueprintName = "ReMindful"
+            ReferencedContainer = "container:ReMindful.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -63,8 +63,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "92A381D229DF744F003EAA4C"
             BuildableName = "HabitFlash.app"
-            BlueprintName = "HabitFlash"
-            ReferencedContainer = "container:HabitFlash.xcodeproj">
+            BlueprintName = "ReMindful"
+            ReferencedContainer = "container:ReMindful.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

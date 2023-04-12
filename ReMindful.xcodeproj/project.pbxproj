@@ -14,7 +14,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		92A381D329DF744F003EAA4C /* HabitFlash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HabitFlash.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		92A381D329DF744F003EAA4C /* ReMindful.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReMindful.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92A381D629DF744F003EAA4C /* HabitFlashApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitFlashApp.swift; sourceTree = "<group>"; };
 		92A381D829DF744F003EAA4C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		92A381DA29DF7457003EAA4C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -44,7 +44,7 @@
 		92A381D429DF744F003EAA4C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				92A381D329DF744F003EAA4C /* HabitFlash.app */,
+				92A381D329DF744F003EAA4C /* ReMindful.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -72,9 +72,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		92A381D229DF744F003EAA4C /* HabitFlash */ = {
+		92A381D229DF744F003EAA4C /* ReMindful */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 92A381E229DF7457003EAA4C /* Build configuration list for PBXNativeTarget "HabitFlash" */;
+			buildConfigurationList = 92A381E229DF7457003EAA4C /* Build configuration list for PBXNativeTarget "ReMindful" */;
 			buildPhases = (
 				92A381CF29DF744F003EAA4C /* Sources */,
 				92A381D029DF744F003EAA4C /* Frameworks */,
@@ -84,9 +84,9 @@
 			);
 			dependencies = (
 			);
-			name = HabitFlash;
+			name = ReMindful;
 			productName = HabitFlash;
-			productReference = 92A381D329DF744F003EAA4C /* HabitFlash.app */;
+			productReference = 92A381D329DF744F003EAA4C /* ReMindful.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -104,7 +104,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 92A381CE29DF744F003EAA4C /* Build configuration list for PBXProject "HabitFlash" */;
+			buildConfigurationList = 92A381CE29DF744F003EAA4C /* Build configuration list for PBXProject "ReMindful" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -117,7 +117,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				92A381D229DF744F003EAA4C /* HabitFlash */,
+				92A381D229DF744F003EAA4C /* ReMindful */,
 			);
 		};
 /* End PBXProject section */
@@ -313,7 +313,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		92A381CE29DF744F003EAA4C /* Build configuration list for PBXProject "HabitFlash" */ = {
+		92A381CE29DF744F003EAA4C /* Build configuration list for PBXProject "ReMindful" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				92A381E029DF7457003EAA4C /* Debug */,
@@ -322,7 +322,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		92A381E229DF7457003EAA4C /* Build configuration list for PBXNativeTarget "HabitFlash" */ = {
+		92A381E229DF7457003EAA4C /* Build configuration list for PBXNativeTarget "ReMindful" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				92A381E329DF7457003EAA4C /* Debug */,
