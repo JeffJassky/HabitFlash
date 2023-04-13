@@ -26,13 +26,42 @@ struct HabitFlashApp: App {
     }
 }
 
+
+
+class TimerManager: ObservableObject {
+    @Published var timer: Timer? = nil
+    
+    var timerExpiredCallback: (() -> Void)?
+    
+    func startNewTimer(intervalSeconds: Int, giveOrTakeSeconds: Int) {
+        print("timer starting")
+        timer?.invalidate()
+        let lowerBound = max(1, intervalSeconds - giveOrTakeSeconds)
+        let upperBound = intervalSeconds + giveOrTakeSeconds
+        let interval = Double(Int.random(in: lowerBound...upperBound))
+        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
+            self.timerExpiredCallback?()
+            self.timer = nil
+        }
+    }
+
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+}
+
+
 class AppDelegate: NSObject, NSApplicationDelegate {
+    var timerManager = TimerManager()
+    
     var window: NSWindow!
     var settingsWindow: NSWindow!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         requestNotificationPermission()
-        let contentView = HabitFlashContentView()
+        let contentView = HabitFlashContentView().environmentObject(timerManager)
+        
 
         let window = NSWindow(
             contentRect: NSScreen.main!.frame,
@@ -45,6 +74,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.ignoresMouseEvents = true
         self.window = window
         window.makeKeyAndOrderFront(nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(systemWillSleep(_:)), name: NSWorkspace.willSleepNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(systemDidWake(_:)), name: NSWorkspace.didWakeNotification, object: nil)
+
+
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -55,11 +89,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
     
+    @objc func systemWillSleep(_ notification: Notification) {
+        timerManager.stopTimer()
+    }
+    
+    @objc func systemDidWake(_ notification: Notification) {
+        timerManager.startNewTimer(intervalSeconds: 10, giveOrTakeSeconds: 5)
+    }
+
+    
     func showSettingsWindow() {
         if settingsWindow == nil {
             let settingsView = SettingsView()
             settingsWindow = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 400, height: 200),
+                contentRect: NSRect(x: 0, y: 0, width: 480, height: 200),
                 styleMask: [.titled, .closable, .miniaturizable],
                 backing: .buffered, defer: false)
             settingsWindow.center()
@@ -80,17 +123,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 }
 
+
 struct HabitFlashContentView: View {
+    @EnvironmentObject var timerManager: TimerManager
+    
     @AppStorage("reminders") private var reminders: String = "Stretch,Water,Stand"
-    @AppStorage("minSeconds") private var minSeconds: Int = 5
-    @AppStorage("maxSeconds") private var maxSeconds: Int = 15
-    @AppStorage("fontSize") private var fontSize: Int = 100
+    @AppStorage("intervalSeconds") private var intervalSeconds: Int = 10
+    @AppStorage("giveOrTakeSeconds") private var giveOrTakeSeconds: Int = 5
+    @AppStorage("fontSize") private var fontSize: Double = 100.0
     @AppStorage("fontColor") private var fontColorHex: String = "FFFFFF"
     @AppStorage("fadeInOut") private var fadeInOut: Bool = false
     @AppStorage("playSound") private var playSound: Bool = false
     @AppStorage("sound") private var sound: String = "Default"
     @AppStorage("volume") private var volume: Double = 1.0
     @AppStorage("displayDuration") private var displayDuration: Double = 50
+    @AppStorage("useNotifications") private var useNotifications: Bool = true
     @AppStorage("useFullScreenNotifications") private var useFullScreenNotifications: Bool = true
     @AppStorage("useSystemNotifications") private var useSystemNotifications: Bool = false
 
@@ -115,23 +162,24 @@ struct HabitFlashContentView: View {
             .background(Color.clear)
             .ignoresSafeArea()
             .onAppear {
-                startNewTimer()
-            }
-            .onChange(of: trigger) { _ in
-                showReminder()
+                timerManager.timerExpiredCallback = startOver
                 startNewTimer()
             }
             .opacity(reminderOpacity)
     }
-
+    
+    func startOver() {
+        showReminder();
+        startNewTimer()
+    }
+    
     func startNewTimer() {
-        timer?.invalidate()
-        let interval = Double(Int.random(in: min(minSeconds, maxSeconds)...max(minSeconds, maxSeconds)))
-        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
-            trigger.toggle()
-        }
+        timerManager.startNewTimer(intervalSeconds: intervalSeconds, giveOrTakeSeconds: giveOrTakeSeconds)
     }
 
+    func stopTimer() {
+        timerManager.stopTimer()
+    }
 
     func showReminder() {
         if useFullScreenNotifications {
@@ -161,13 +209,22 @@ struct HabitFlashContentView: View {
             }
         }
         if useSystemNotifications {
+            let soundName: String
+            switch sound {
+            case "Chime":
+                soundName = "Ping"
+            case "Bell":
+                soundName = "Submarine"
+            default:
+                soundName = "Purr"
+            }
             print("Showing system notification");
             let content = UNMutableNotificationContent()
-            content.title = "HabitFlash Reminder"
+            content.title = "ReMindful"
             content.body = reminderText
-            content.sound = playSound ? UNNotificationSound(named: UNNotificationSoundName(rawValue: sound)) : nil
+            content.sound = playSound ? UNNotificationSound(named: UNNotificationSoundName(rawValue: soundName)) : nil
 
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
             let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
 
             UNUserNotificationCenter.current().add(request)
@@ -200,91 +257,101 @@ struct HabitFlashContentView: View {
 
 struct SettingsView: View {
     @AppStorage("reminders") private var reminders: String = "Stretch,Water,Stand"
-    @AppStorage("minSeconds") private var minSeconds: Int = 5
-    @AppStorage("maxSeconds") private var maxSeconds: Int = 15
-    @AppStorage("fontSize") private var fontSize: Int = 100
+    @AppStorage("intervalSeconds") private var intervalSeconds: Int = 10
+    @AppStorage("giveOrTakeSeconds") private var giveOrTakeSeconds: Int = 5
+    @AppStorage("fontSize") private var fontSize: Double = 100.0
     @AppStorage("fontColor") private var fontColorHex: String = "FFFFFF"
     @AppStorage("fadeInOut") private var fadeInOut: Bool = false
     @AppStorage("playSound") private var playSound: Bool = false
     @AppStorage("sound") private var sound: String = "Default"
     @AppStorage("volume") private var volume: Double = 1.0
     @AppStorage("displayDuration") private var displayDuration: Double = 50
+    @AppStorage("useNotifications") private var useNotifications: Bool = true
     @AppStorage("useFullScreenNotifications") private var useFullScreenNotifications: Bool = true
     @AppStorage("useSystemNotifications") private var useSystemNotifications: Bool = false
+    
     private var fontColor: Binding<Color> {
         Binding<Color>(
             get: { Color.fromHexString(fontColorHex) },
             set: { fontColorHex = $0.toHexString() }
         )
     }
-
     var body: some View {
-        VStack (alignment: .leading) {
+        VStack(alignment: .leading) {
             HStack {
-                Text("Reminders:")
-                TextEditor(text: $reminders)
-                    .frame(minHeight: 100, maxHeight: .infinity)
-                    .border(Color.gray, width: 1)
-            }
-            GroupBox(label: Text("Notification display settings")) {
-                VStack(alignment: .leading) {
-                    Toggle("Use full screen notifications", isOn: $useFullScreenNotifications)
-                    Toggle("Use system notifications", isOn: $useSystemNotifications)
-                }
-            }
-            .padding(.bottom)
-            HStack {
-                Text("Min seconds:")
-                TextField("", value: $minSeconds, formatter: NumberFormatter())
+                Toggle("Remind every", isOn: $useNotifications)
+                TextField("", value: $intervalSeconds, formatter: NumberFormatter())
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(width: 50)
 
-                Text("Max seconds:")
-                TextField("", value: $maxSeconds, formatter: NumberFormatter())
+                Text("seconds give or take")
+                TextField("", value: $giveOrTakeSeconds, formatter: NumberFormatter())
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(width: 50)
+                Text("seconds.")
             }
-            HStack {
-                Text("Display duration:")
-                Slider(value: $displayDuration, in: 0...100)
-                    .frame(width: 150)
-                Text("\(Int(displayDuration))")
-            }
-            HStack {
-                Text("Font size:")
-                TextField("", value: $fontSize, formatter: NumberFormatter())
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 50)
-            }
-            HStack {
-                Text("Font color:")
-                ColorPicker("", selection: fontColor)
-                    .labelsHidden()
-                    .frame(width: 100)
-            }
-            Toggle("Fade in and out", isOn: $fadeInOut)
+            Spacer(minLength: CGFloat(10))
+            Divider()
+            Spacer(minLength: CGFloat(10))
             
-            Toggle("Play sound", isOn: $playSound)
+            Text("Reminders:").font(.headline)
+                .alignmentGuide(.leading) { d in d[.leading] }
+            TextEditor(text: $reminders)
+                .frame(minHeight: 100, maxHeight: .infinity)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(15) // Add padding to the text input
+                .cornerRadius(30)
             
-            HStack {
-                Text("Sound:")
-                Picker("Sound", selection: $sound) {
-                    Text("Default").tag("Default")
-                    Text("Chime").tag("Chime")
-                    Text("Bell").tag("Bell")
-                    // Add more sounds here
+            GroupBox(label: Text("Display Settings").font(.headline)) {
+                VStack(alignment: .leading) {
+                    Toggle("Show system reminders", isOn: $useSystemNotifications)
+                    Divider()
+                    Toggle("Show full screen reminders", isOn: $useFullScreenNotifications)
+                    Toggle("Fade in and out", isOn: $fadeInOut)
+                    HStack {
+                        Text("Display duration:")
+                        Slider(value: $displayDuration, in: 0...100)
+                            .frame(width: 100)
+                        Text("\(Int(displayDuration))")
+                    }
+                    HStack {
+                        Text("Font:")
+                        Slider(value: $fontSize, in: 30...250)
+                            .frame(width: 100)
+                        ColorPicker("", selection: fontColor)
+                            .labelsHidden()
+                            .frame(width: 100)
+                    }
                 }
-                .frame(width: 150)
-            }
-            
-            HStack {
-                Text("Volume:")
-                Slider(value: $volume, in: 0...1)
-                    .frame(width: 150)
+                .padding(15).frame(maxWidth: .infinity)
+            }.padding() // Stretch the group width to full width
+
+
+            VStack(alignment: .leading) {
+                GroupBox(label: Text("Sound Settings").font(.headline)) {
+
+                    HStack {
+                        Toggle("Play sound", isOn: $playSound)
+                        Picker("", selection: $sound) {
+                            Text("Default").tag("Default")
+                            Text("Chime").tag("Chime")
+                            Text("Bell").tag("Bell")
+                            // Add more sounds here
+                        }.frame(width: 100)
+                        Text("at volume")
+                        Slider(value: $volume, in: 0...1)
+                            .frame(width: 100)
+                    }.padding(15).frame(maxWidth: .infinity)
+                }
+                .padding()
             }
         }
         .padding()
     }
+
+
+
+
 }
 
 struct SettingsScene: Scene {
