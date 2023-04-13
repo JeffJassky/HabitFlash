@@ -132,6 +132,7 @@ struct HabitFlashContentView: View {
     @AppStorage("giveOrTakeSeconds") private var giveOrTakeSeconds: Int = 5
     @AppStorage("fontSize") private var fontSize: Double = 100.0
     @AppStorage("fontColor") private var fontColorHex: String = "FFFFFF"
+    @AppStorage("fontShadow") private var fontShadow: Bool = true
     @AppStorage("fadeInOut") private var fadeInOut: Bool = false
     @AppStorage("playSound") private var playSound: Bool = false
     @AppStorage("sound") private var sound: String = "Default"
@@ -161,6 +162,7 @@ struct HabitFlashContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.clear)
             .ignoresSafeArea()
+            .shadow(color: fontShadow ? Color.black : Color.clear, radius: CGFloat(fontSize/5), x: CGFloat(fontSize/20), y: CGFloat(fontSize/20))
             .onAppear {
                 timerManager.timerExpiredCallback = startOver
                 startNewTimer()
@@ -261,6 +263,7 @@ struct SettingsView: View {
     @AppStorage("giveOrTakeSeconds") private var giveOrTakeSeconds: Int = 5
     @AppStorage("fontSize") private var fontSize: Double = 100.0
     @AppStorage("fontColor") private var fontColorHex: String = "FFFFFF"
+    @AppStorage("fontShadow") private var fontShadow: Bool = true
     @AppStorage("fadeInOut") private var fadeInOut: Bool = false
     @AppStorage("playSound") private var playSound: Bool = false
     @AppStorage("sound") private var sound: String = "Default"
@@ -308,6 +311,7 @@ struct SettingsView: View {
                     Divider()
                     Toggle("Show full screen reminders", isOn: $useFullScreenNotifications)
                     Toggle("Fade in and out", isOn: $fadeInOut)
+                    Toggle("Text shadow", isOn: $fontShadow)
                     HStack {
                         Text("Display duration:")
                         Slider(value: $displayDuration, in: 0...100)
