@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ReMindful</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>x86_64</string>
+				<string>arm64</string>
+			</array>
+			<key>buildNumber</key>
+			<string>1</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>6EE6B4FAA8C7BABBB3E5261E6D676B7AAA495C0C</string>
+				<key>dateExpires</key>
+				<string>2/13/26</string>
+				<key>type</key>
+				<string>Developer ID Application</string>
+			</dict>
+			<key>entitlements</key>
+			<dict>
+				<key>com.apple.security.app-sandbox</key>
+				<true/>
+				<key>com.apple.security.files.user-selected.read-only</key>
+				<true/>
+			</dict>
+			<key>name</key>
+			<string>ReMindful.app</string>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>U59KR8A4Q3</string>
+				<key>name</key>
+				<string>Jeffrey Jassky</string>
+			</dict>
+			<key>versionNumber</key>
+			<string>1.0</string>
+		</dict>
+	</array>
+</dict>
+</plist>

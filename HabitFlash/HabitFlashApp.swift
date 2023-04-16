@@ -19,11 +19,14 @@ struct HabitFlashApp: App {
 struct ReminderGroup: Identifiable, Codable {
     var id = UUID()
     var reminders: String
-    var intervalSeconds: Int
-    var giveOrTakeSeconds: Int
+    var intervalCount: Int
+    var interval: String
+    var giveOrTakeCount: Int
+    var giveOrTakeInterval: String
 }
 
 class SettingsManager: ObservableObject{
+    var displayMessagePublisher = PassthroughSubject<String, Never>()
     @Published var reminderGroupManager = ReminderGroupManager()
     @AppStorage("fontSize") var fontSize: Double = 100.0
     @AppStorage("fontColor") var fontColorHex: String = "FFFFFF"
@@ -47,7 +50,6 @@ class SettingsManager: ObservableObject{
 }
 
 class TimerManager: ObservableObject {
-    let intervalSize: Double = 1; // use 60 for "minutes"
     @EnvironmentObject var reminderGroupManager: ReminderGroupManager
     var showReminderPublisher = PassthroughSubject<UUID, Never>()
     
@@ -62,11 +64,13 @@ class TimerManager: ObservableObject {
         stopTimer(groupID: groupID)
         if let index = settings.reminderGroupManager.reminderGroups.firstIndex(where: { $0.id == groupID }) {
             let reminderGroup = settings.reminderGroupManager.reminderGroups[index]
-            let lowerBound = reminderGroup.intervalSeconds - reminderGroup.giveOrTakeSeconds
-            let upperBound = reminderGroup.intervalSeconds + reminderGroup.giveOrTakeSeconds
+            let interervalMultiplier = reminderGroup.interval == "Minutes" ? 60 : reminderGroup.interval == "Hours" ? 3600 : reminderGroup.interval == "Days" ? 86400 : 1;
+            let giveOrTakeMultiplier = reminderGroup.giveOrTakeInterval == "Minutes" ? 60 : reminderGroup.giveOrTakeInterval == "Hours" ? 3600 : reminderGroup.giveOrTakeInterval == "Days" ? 86400 : 1;
+            let lowerBound = (reminderGroup.intervalCount * interervalMultiplier) - (reminderGroup.giveOrTakeCount * giveOrTakeMultiplier)
+            let upperBound = (reminderGroup.intervalCount * interervalMultiplier) + (reminderGroup.giveOrTakeCount * giveOrTakeMultiplier)
             let randomInterval = Int.random(in: lowerBound...upperBound)
             
-            let timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(randomInterval) * intervalSize, repeats: false) { _ in
+            let timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(randomInterval), repeats: false) { _ in
                 print("Showing reminder", groupID)
                 self.showReminderPublisher.send(groupID)
             }
@@ -189,6 +193,7 @@ struct HabitFlashContentView: View {
     @State private var reminderText = ""
     @State private var trigger = false
     @State private var reminderOpacity = 0.0
+    @State private var hideWorkItem: DispatchWorkItem?
 
     var body: some View {
         Text(reminderText)
@@ -203,13 +208,15 @@ struct HabitFlashContentView: View {
             }
             .opacity(reminderOpacity)
             .onReceive(timerManager.showReminderPublisher) { groupId in
-                showReminder(group: groupId)
+                showReminderGroupReminder(group: groupId)
+            }
+            .onReceive(settings.displayMessagePublisher) { message in
+                print("got message", message)
+                showReminder(reminder: message)
             }
     }
 
-    func showReminder(group: UUID){
-        print("real deal", group)
-        
+    func showReminderGroupReminder(group: UUID){
         if let thisGroup = settings.reminderGroupManager.reminderGroups.first(where: { $0.id == group }) {
             let remindersArray = thisGroup.reminders.components(separatedBy: ",")
             if let randomReminder = remindersArray.randomElement() {
@@ -220,6 +227,13 @@ struct HabitFlashContentView: View {
         } else {
             reminderText = "Invalid group ID"
         }
+        showReminder(reminder: reminderText)
+        timerManager.startNewTimer(groupID: group)
+    }
+    
+    func showReminder(reminder: String){
+        reminderText = reminder;
+        hideWorkItem?.cancel()
         
         if settings.useFullScreenNotifications {
             if(settings.playSound){
@@ -236,8 +250,7 @@ struct HabitFlashContentView: View {
                 withAnimation(.easeInOut(duration: 0.5)) {
                     reminderOpacity = 1.0
                 }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                let newWorkItem = DispatchWorkItem {
                     withAnimation(.easeInOut(duration: 0.5)) {
                         reminderOpacity = 0.0
                     }
@@ -245,12 +258,16 @@ struct HabitFlashContentView: View {
                         reminderText = ""
                     }
                 }
+                hideWorkItem = newWorkItem
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: newWorkItem)
             } else {
                 reminderOpacity = 1.0
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                let newWorkItem = DispatchWorkItem {
                     reminderOpacity = 0.0
                     reminderText = ""
-                }
+                };
+                hideWorkItem = newWorkItem;
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: newWorkItem)
             }
         }
         if settings.useSystemNotifications {
@@ -265,20 +282,20 @@ struct HabitFlashContentView: View {
 
             UNUserNotificationCenter.current().add(request)
         }
-        timerManager.startNewTimer(groupID: group)
     }
 }
 
 struct SettingsView: View {
     
+    @EnvironmentObject var settings: SettingsManager
     @State var selection: Set<Int> = [0]
     
     var body: some View {
         NavigationView {
             List(selection: self.$selection) {
                 Label("Reminders", systemImage: "alarm.fill").accentColor(.orange).tag(0)
-                Label("Display", systemImage: "eye.fill").accentColor(.orange).tag(1)
-                Label("Sound", systemImage: "ear.fill").accentColor(.orange).tag(2)
+                Label("Visuals", systemImage: "eye.fill").accentColor(.orange).tag(1)
+                Label("Sound", systemImage: "speaker.2.fill").accentColor(.orange).tag(2)
             }
             .listStyle(SidebarListStyle())
             .frame(minWidth: 180, idealWidth: 180, maxWidth: 180, maxHeight: .infinity)
@@ -318,65 +335,12 @@ struct ReminderGroupSettingsView: View{
             HStack{
                 Spacer().frame(maxWidth: .infinity)
                 Button("New reminder group") {
-                    let reminderGroup = ReminderGroup(reminders: "Stretch,Water,Stand", intervalSeconds: 10, giveOrTakeSeconds: 5);
+                    let reminderGroup = ReminderGroup(reminders: "Stretch,Water,Stand", intervalCount: 10, interval: "Minutes", giveOrTakeCount: 5, giveOrTakeInterval: "Minutes");
                     settings.reminderGroupManager.reminderGroups.append(reminderGroup)
                     timerManager.startNewTimer(groupID: reminderGroup.id)
-                }.frame(alignment: .trailing)
+                }.padding().frame(alignment: .trailing)
             }
          }
-    }
-}
-
-struct DisplaySettingsView: View {
-    @EnvironmentObject var settings: SettingsManager
-    var body: some View {
-        GroupBox(label: Text("Display Settings").font(.headline)) {
-            VStack(alignment: .leading) {
-                Toggle("Show system reminders", isOn: settings.$useSystemNotifications)
-                Divider()
-                Toggle("Show full screen reminders", isOn: settings.$useFullScreenNotifications)
-                Toggle("Fade in and out", isOn: settings.$fadeInOut)
-                Toggle("Text shadow", isOn: settings.$fontShadow)
-                HStack {
-                    Text("Display duration:")
-                    Slider(value: settings.$displayDuration, in: 0...100)
-                        .frame(width: 100)
-                }
-                HStack {
-                    Text("Font:")
-                    Slider(value: settings.$fontSize, in: 30...250)
-                        .frame(width: 100)
-                    ColorPicker("", selection: settings.fontColor)
-                        .labelsHidden()
-                        .frame(width: 100)
-                }
-            }
-            .padding(15).frame(maxWidth: .infinity)
-        }.padding() // Stretch the group width to full width
-    }
-}
-
-struct SoundSettingsView: View {
-    @EnvironmentObject var settings: SettingsManager
-    var body: some View{
-        VStack(alignment: .leading) {
-            GroupBox(label: Text("Sound Settings").font(.headline)) {
-
-                HStack {
-                    Toggle("Play sound", isOn: settings.$playSound)
-                    Picker("", selection: settings.$sound) {
-                        Text("Default").tag("Purr")
-                        Text("Chime").tag("Submarine")
-                        Text("Bell").tag("Ping")
-                        // Add more sounds here
-                    }.frame(width: 100)
-                    Text("at volume")
-                    Slider(value: settings.$volume, in: 0...1)
-                        .frame(width: 100)
-                }.padding(15).frame(maxWidth: .infinity)
-            }
-            .padding()
-        }
     }
 }
 
@@ -387,6 +351,8 @@ struct ReminderGroupListView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
+            Text("Reminders").font(.title).padding()
+            Divider()
             ForEach(Array(reminderGroupManager.reminderGroups.enumerated()), id: \.element.id) { index, group in
                 ReminderGroupView(reminderGroup: $reminderGroupManager.reminderGroups[index], onDelete: {
                     reminderGroupManager.reminderGroups.remove(at: index)
@@ -399,6 +365,8 @@ struct ReminderGroupListView: View {
 
 struct ReminderGroupView: View {
     @Binding var reminderGroup: ReminderGroup
+    @EnvironmentObject var settings: SettingsManager
+    @EnvironmentObject var timerManager: TimerManager
     var onDelete: (() -> Void)?
 
     var body: some View {
@@ -406,19 +374,107 @@ struct ReminderGroupView: View {
         GroupBox {
             VStack(alignment: .leading) {
                 HStack {
-                    Text("Remind every")
-                    TextField("Interval seconds", value: $reminderGroup.intervalSeconds, formatter: NumberFormatter()).frame(width: 30)
-                    Text("minutes, give or take")
-                    TextField("Give or take", value: $reminderGroup.giveOrTakeSeconds, formatter: NumberFormatter()).frame(width: 30)
-                    Text("mins")
-                    Spacer().frame(maxWidth: .infinity)
-                    Button("-") {
-                        onDelete?()
-                    }.frame(alignment: .trailing)
+                    Text("Remind me every")
+                    TextField("Interval seconds", value: $reminderGroup.intervalCount, formatter: NumberFormatter()).frame(width: 30)
+                    Picker("", selection: $reminderGroup.interval) {
+                        Text(reminderGroup.intervalCount == 1 ? "Minute" : "Minutes").tag("Minutes")
+                        Text(reminderGroup.intervalCount == 1 ? "Hour" : "Hours").tag("Hours")
+                        Text(reminderGroup.intervalCount == 1 ? "Day" : "Days").tag("Days")
+                        // Add more sounds here
+                    }.frame(width: 100)
+                    Text("give or take")
+                    TextField("Give or take", value: $reminderGroup.giveOrTakeCount, formatter: NumberFormatter()).frame(width: 30)
+                    Picker("", selection: $reminderGroup.giveOrTakeInterval) {
+                        Text(reminderGroup.giveOrTakeCount == 1 ? "Minute" : "Minutes").tag("Minutes")
+                        Text(reminderGroup.giveOrTakeCount == 1 ? "Hour" : "Hours").tag("Hours")
+                        Text(reminderGroup.giveOrTakeCount == 1 ? "Day" : "Days").tag("Days")
+                        // Add more sounds here
+                    }.frame(width: 100)
                 }
                 TextField("Reminders", text: $reminderGroup.reminders)
+                HStack{
+                    Spacer().frame(maxWidth: .infinity)
+                    Button("Remove group") {
+                        onDelete?()
+                    }.frame(alignment: .trailing)
+                    Button("View sample") {
+                        timerManager.showReminderPublisher.send(reminderGroup.id)
+                    }.frame(alignment: .trailing)
+                }
             }.padding()
         }
         .padding()
+    }
+}
+
+
+struct DisplaySettingsView: View {
+    @EnvironmentObject var settings: SettingsManager
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Visual settings").font(.title).padding()
+            Divider()
+            VStack(alignment: .leading){
+                Toggle("Show system reminders", isOn: settings.$useSystemNotifications).onChange(of: settings.useSystemNotifications) { newValue in
+                    settings.displayMessagePublisher.send(newValue ? "System reminders on" : "System reminders off")
+                }
+                Divider()
+                Toggle("Show full screen reminders", isOn: settings.$useFullScreenNotifications).onChange(of: settings.useFullScreenNotifications) { newValue in
+                    settings.displayMessagePublisher.send(newValue ? "Full screen reminders on" : "Full screen reminders off")
+                }
+                Toggle("Fade in and out", isOn: settings.$fadeInOut).onChange(of: settings.fadeInOut) { newValue in
+                    settings.displayMessagePublisher.send(newValue ? "Fade enabled" : "Fade disabled")
+                }
+                Toggle("Text shadow", isOn: settings.$fontShadow).onChange(of: settings.fontShadow) { newValue in
+                    settings.displayMessagePublisher.send(newValue ? "Text shadow on" : "Text shadow off")
+                }
+                HStack {
+                    Text("Display duration:")
+                    Slider(value: settings.$displayDuration, in: 0...100, onEditingChanged: { bool in
+                        if(!bool){
+                            settings.displayMessagePublisher.send("Display duration changed")
+                        }
+                      })
+                        .frame(width: 100)
+                }
+                HStack {
+                    Text("Font:")
+                    Slider(value: settings.$fontSize, in: 30...250, onEditingChanged: { bool in
+                        if(!bool){
+                            settings.displayMessagePublisher.send("Font size changed")
+                        }
+                      })
+                        .frame(width: 100)
+                    ColorPicker("", selection: settings.fontColor)
+                        .labelsHidden()
+                        .frame(width: 100)
+                        .onChange(of: settings.fontColorHex) { newValue in
+                            settings.displayMessagePublisher.send("Font color changed")
+                        }
+                }
+            }.padding()
+        }
+    }
+}
+
+struct SoundSettingsView: View {
+    @EnvironmentObject var settings: SettingsManager
+    var body: some View{
+        VStack(alignment: .leading) {
+            Text("Sound settings").font(.title).padding()
+            Divider()
+            HStack {
+                Toggle("Play sound", isOn: settings.$playSound)
+                Picker("", selection: settings.$sound) {
+                    Text("Default").tag("Purr")
+                    Text("Chime").tag("Submarine")
+                    Text("Bell").tag("Ping")
+                    // Add more sounds here
+                }.frame(width: 100)
+                Text("at volume")
+                Slider(value: settings.$volume, in: 0...1)
+                    .frame(width: 100)
+            }.padding()
+        }
     }
 }
