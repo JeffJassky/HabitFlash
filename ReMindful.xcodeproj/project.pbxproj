@@ -7,6 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		922AE9AA2B57200F0054CC6F /* ReminderGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9A92B57200F0054CC6F /* ReminderGroup.swift */; };
+		922AE9AC2B5720420054CC6F /* ReminderGroupSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9AB2B5720420054CC6F /* ReminderGroupSchedule.swift */; };
+		922AE9AF2B5720AD0054CC6F /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9AE2B5720AD0054CC6F /* SettingsManager.swift */; };
+		922AE9B12B5720C60054CC6F /* ReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9B02B5720C60054CC6F /* ReminderManager.swift */; };
+		922AE9B32B57217D0054CC6F /* ReminderGroupManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9B22B57217D0054CC6F /* ReminderGroupManager.swift */; };
+		922AE9B62B57220B0054CC6F /* HabitFlashContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9B52B57220B0054CC6F /* HabitFlashContentView.swift */; };
+		922AE9B82B5724160054CC6F /* PomodoroManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9B72B5724160054CC6F /* PomodoroManager.swift */; };
+		922AE9BA2B5724E10054CC6F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9B92B5724E10054CC6F /* SettingsView.swift */; };
+		922AE9BC2B5725FD0054CC6F /* ReminderGroupSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9BB2B5725FD0054CC6F /* ReminderGroupSettingsView.swift */; };
+		922AE9BE2B5726760054CC6F /* DisplaySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9BD2B5726760054CC6F /* DisplaySettingsView.swift */; };
+		922AE9C02B57272F0054CC6F /* SoundSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9BF2B57272F0054CC6F /* SoundSettingsView.swift */; };
+		922AE9C22B5727940054CC6F /* PomodoroTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9C12B5727940054CC6F /* PomodoroTimerView.swift */; };
+		922AE9C42B5728540054CC6F /* CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9C32B5728540054CC6F /* CalendarSettingsView.swift */; };
+		922AE9C62B5728C40054CC6F /* ReminderGroupScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9C52B5728C40054CC6F /* ReminderGroupScheduleView.swift */; };
+		922AE9C82B5729150054CC6F /* ReminderGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9C72B5729150054CC6F /* ReminderGroupView.swift */; };
+		922AE9CA2B57293D0054CC6F /* ReminderGroupListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922AE9C92B57293D0054CC6F /* ReminderGroupListView.swift */; };
 		92A381D729DF744F003EAA4C /* HabitFlashApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A381D629DF744F003EAA4C /* HabitFlashApp.swift */; };
 		92A381D929DF744F003EAA4C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A381D829DF744F003EAA4C /* ContentView.swift */; };
 		92A381DB29DF7457003EAA4C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 92A381DA29DF7457003EAA4C /* Assets.xcassets */; };
@@ -15,6 +31,22 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		922AE9A92B57200F0054CC6F /* ReminderGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderGroup.swift; sourceTree = "<group>"; };
+		922AE9AB2B5720420054CC6F /* ReminderGroupSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderGroupSchedule.swift; sourceTree = "<group>"; };
+		922AE9AE2B5720AD0054CC6F /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		922AE9B02B5720C60054CC6F /* ReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderManager.swift; sourceTree = "<group>"; };
+		922AE9B22B57217D0054CC6F /* ReminderGroupManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderGroupManager.swift; sourceTree = "<group>"; };
+		922AE9B52B57220B0054CC6F /* HabitFlashContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitFlashContentView.swift; sourceTree = "<group>"; };
+		922AE9B72B5724160054CC6F /* PomodoroManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroManager.swift; sourceTree = "<group>"; };
+		922AE9B92B5724E10054CC6F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		922AE9BB2B5725FD0054CC6F /* ReminderGroupSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderGroupSettingsView.swift; sourceTree = "<group>"; };
+		922AE9BD2B5726760054CC6F /* DisplaySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaySettingsView.swift; sourceTree = "<group>"; };
+		922AE9BF2B57272F0054CC6F /* SoundSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundSettingsView.swift; sourceTree = "<group>"; };
+		922AE9C12B5727940054CC6F /* PomodoroTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroTimerView.swift; sourceTree = "<group>"; };
+		922AE9C32B5728540054CC6F /* CalendarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingsView.swift; sourceTree = "<group>"; };
+		922AE9C52B5728C40054CC6F /* ReminderGroupScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderGroupScheduleView.swift; sourceTree = "<group>"; };
+		922AE9C72B5729150054CC6F /* ReminderGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderGroupView.swift; sourceTree = "<group>"; };
+		922AE9C92B57293D0054CC6F /* ReminderGroupListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderGroupListView.swift; sourceTree = "<group>"; };
 		92A381D329DF744F003EAA4C /* ReMindful.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReMindful.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92A381D629DF744F003EAA4C /* HabitFlashApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitFlashApp.swift; sourceTree = "<group>"; };
 		92A381D829DF744F003EAA4C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -35,6 +67,43 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		922AE9A82B571FE30054CC6F /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				922AE9A92B57200F0054CC6F /* ReminderGroup.swift */,
+				922AE9AB2B5720420054CC6F /* ReminderGroupSchedule.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		922AE9AD2B57208B0054CC6F /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				922AE9AE2B5720AD0054CC6F /* SettingsManager.swift */,
+				922AE9B02B5720C60054CC6F /* ReminderManager.swift */,
+				922AE9B22B57217D0054CC6F /* ReminderGroupManager.swift */,
+				922AE9B72B5724160054CC6F /* PomodoroManager.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		922AE9B42B57219E0054CC6F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				922AE9B52B57220B0054CC6F /* HabitFlashContentView.swift */,
+				922AE9B92B5724E10054CC6F /* SettingsView.swift */,
+				922AE9BB2B5725FD0054CC6F /* ReminderGroupSettingsView.swift */,
+				922AE9BD2B5726760054CC6F /* DisplaySettingsView.swift */,
+				922AE9BF2B57272F0054CC6F /* SoundSettingsView.swift */,
+				922AE9C12B5727940054CC6F /* PomodoroTimerView.swift */,
+				922AE9C32B5728540054CC6F /* CalendarSettingsView.swift */,
+				922AE9C52B5728C40054CC6F /* ReminderGroupScheduleView.swift */,
+				922AE9C72B5729150054CC6F /* ReminderGroupView.swift */,
+				922AE9C92B57293D0054CC6F /* ReminderGroupListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		92A381CA29DF744F003EAA4C = {
 			isa = PBXGroup;
 			children = (
@@ -54,6 +123,9 @@
 		92A381D529DF744F003EAA4C /* HabitFlash */ = {
 			isa = PBXGroup;
 			children = (
+				922AE9B42B57219E0054CC6F /* Views */,
+				922AE9AD2B57208B0054CC6F /* ViewModels */,
+				922AE9A82B571FE30054CC6F /* Models */,
 				92A381D629DF744F003EAA4C /* HabitFlashApp.swift */,
 				92A381D829DF744F003EAA4C /* ContentView.swift */,
 				92A381DA29DF7457003EAA4C /* Assets.xcassets */,
@@ -143,8 +215,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				92E2234029E9E14B00825D38 /* ColorExtension.swift in Sources */,
+				922AE9AA2B57200F0054CC6F /* ReminderGroup.swift in Sources */,
+				922AE9AF2B5720AD0054CC6F /* SettingsManager.swift in Sources */,
+				922AE9C22B5727940054CC6F /* PomodoroTimerView.swift in Sources */,
+				922AE9C02B57272F0054CC6F /* SoundSettingsView.swift in Sources */,
+				922AE9B32B57217D0054CC6F /* ReminderGroupManager.swift in Sources */,
+				922AE9BE2B5726760054CC6F /* DisplaySettingsView.swift in Sources */,
+				922AE9B12B5720C60054CC6F /* ReminderManager.swift in Sources */,
+				922AE9B62B57220B0054CC6F /* HabitFlashContentView.swift in Sources */,
+				922AE9B82B5724160054CC6F /* PomodoroManager.swift in Sources */,
 				92A381D929DF744F003EAA4C /* ContentView.swift in Sources */,
+				922AE9C42B5728540054CC6F /* CalendarSettingsView.swift in Sources */,
+				922AE9C62B5728C40054CC6F /* ReminderGroupScheduleView.swift in Sources */,
 				92A381D729DF744F003EAA4C /* HabitFlashApp.swift in Sources */,
+				922AE9BC2B5725FD0054CC6F /* ReminderGroupSettingsView.swift in Sources */,
+				922AE9AC2B5720420054CC6F /* ReminderGroupSchedule.swift in Sources */,
+				922AE9C82B5729150054CC6F /* ReminderGroupView.swift in Sources */,
+				922AE9CA2B57293D0054CC6F /* ReminderGroupListView.swift in Sources */,
+				922AE9BA2B5724E10054CC6F /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,6 +364,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"HabitFlash/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Remindful requires calendar access to display reminders for your events.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -301,6 +390,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"HabitFlash/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Remindful requires calendar access to display reminders for your events.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
